@@ -1,0 +1,34 @@
+{% extends 'devices/base.html' %}
+
+{% block content %}
+
+<div class="header">
+    <h1>{{ title }}</h1>
+    <p>Заполните данные сетевого устройства</p>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-row">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.errors %}
+                    <div style="color: #dc2626; margin-top: 6px;">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="actions">
+            <button class="btn btn-primary" type="submit">{{ button_text }}</button>
+            <a class="btn btn-gray" href="{% url 'devices:device_list' %}">Отмена</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

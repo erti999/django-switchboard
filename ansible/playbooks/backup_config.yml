@@ -1,0 +1,21 @@
+---
+- name: Backup Cisco switch running config
+  hosts: switches
+  gather_facts: false
+
+  tasks:
+    - name: Get running config
+      cisco.ios.ios_command:
+        commands:
+          - show running-config
+      register: backup_result
+
+    - name: Save backup locally
+      ansible.builtin.copy:
+        content: "{{ backup_result.stdout[0] }}"
+        dest: "{{ backup_file }}"
+        mode: "0600"
+
+    - name: Print backup location
+      ansible.builtin.debug:
+        msg: "Backup saved to {{ backup_file }}"

@@ -1,0 +1,17 @@
+---
+- name: Get Cisco switch information
+  hosts: switches
+  gather_facts: false
+
+  tasks:
+    - name: Run show commands
+      cisco.ios.ios_command:
+        commands:
+          - show version
+          - show ip interface brief
+          - show interfaces status
+      register: command_result
+
+    - name: Print command output
+      ansible.builtin.debug:
+        var: command_result.stdout_lines

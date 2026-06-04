@@ -1,0 +1,90 @@
+{% extends 'devices/base.html' %}
+
+{% block content %}
+
+<div class="header">
+    <h1>Операция #{{ task.id }}</h1>
+    <p>{{ task.get_task_type_display }} — {{ task.device.name }}</p>
+</div>
+
+<div class="card">
+    <div class="detail-grid">
+        <div class="detail-label">Коммутатор</div>
+        <div>
+            <a href="{% url 'devices:device_detail' task.device.pk %}">
+                {{ task.device.name }} — {{ task.device.ip_address }}
+            </a>
+        </div>
+
+        <div class="detail-label">Тип операции</div>
+        <div>{{ task.get_task_type_display }}</div>
+
+        <div class="detail-label">Статус</div>
+        <div>
+            <span class="status {% if task.status == 'success' %}online{% elif task.status == 'failed' %}offline{% else %}unknown{% endif %}">
+                {{ task.get_status_display }}
+            </span>
+        </div>
+
+        <div class="detail-label">Пользователь</div>
+        <div>
+            {% if task.user %}
+                {{ task.user.username }}
+            {% else %}
+                Unknown
+            {% endif %}
+        </div>
+
+        <div class="detail-label">Создано</div>
+        <div>{{ task.created_at|date:"d.m.Y H:i" }}</div>
+
+        {% if task.selected_ports %}
+            <div class="detail-label">Порты</div>
+            <div>
+                {% for port in task.selected_ports %}
+                    <span class="status unknown" style="margin-right: 6px; margin-bottom: 6px;">
+                        {{ port }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if task.backup_file %}
+            <div class="detail-label">Файл backup</div>
+            <div>{{ task.backup_file }}</div>
+        {% endif %}
+    </div>
+
+    {% if task.command_preview %}
+        <div style="margin-top: 28px;">
+            <h2>Команда / playbook</h2>
+            <pre style="background: #0f172a; color: #e5e7eb; padding: 18px; border-radius: 14px; overflow-x: auto;">{{ task.command_preview }}</pre>
+        </div>
+    {% endif %}
+
+    {% if task.stdout %}
+        <div style="margin-top: 28px;">
+            <h2>Вывод</h2>
+            <pre style="background: #0f172a; color: #e5e7eb; padding: 18px; border-radius: 14px; overflow-x: auto; white-space: pre-wrap;">{{ task.stdout }}</pre>
+        </div>
+    {% endif %}
+
+    {% if task.stderr %}
+        <div style="margin-top: 28px;">
+            <h2>Ошибки</h2>
+            <pre style="background: #7f1d1d; color: #fee2e2; padding: 18px; border-radius: 14px; overflow-x: auto; white-space: pre-wrap;">{{ task.stderr }}</pre>
+        </div>
+    {% endif %}
+
+    <div class="actions" style="margin-top: 24px;">
+        <a class="btn btn-gray" href="{% url 'devices:network_task_list' %}">
+            Все операции
+        </a>
+
+        <a class="btn btn-gray" href="{% url 'devices:device_detail' task.device.pk %}">
+            Назад к коммутатору
+        </a>
+    </div>
+</div>
+
+{% endblock %}

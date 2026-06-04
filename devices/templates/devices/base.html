@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwitchBoard</title>
+
+    <style>
+        :root {
+            --bg: #eef1f6;
+            --sidebar: #ffffff;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #2563eb;
+            --primary-soft: #dbeafe;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --dark: #0f172a;
+            --gray-btn: #eef2f7;
+            --gray-btn-hover: #e2e8f0;
+            --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* ===== Layout ===== */
+
+        .app-shell {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 230px;
+            min-height: 100vh;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 22px 22px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            display: block;
+            margin-bottom: 14px;
+        }
+
+        .user-card {
+            padding: 12px;
+            border-radius: 14px;
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+        }
+
+        .user-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .sidebar-nav {
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.18s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--surface-soft);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 14px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        .logout-button:hover {
+            background: #fef2f2;
+            color: var(--danger);
+        }
+
+        .sidebar-collapse {
+            margin-top: 14px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 18px;
+        }
+
+        .main {
+            margin-left: 230px;
+            width: calc(100% - 230px);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 34px 60px;
+        }
+
+        /* ===== Auth page ===== */
+
+        .auth-main {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-main .container {
+            max-width: 460px;
+            padding: 0;
+        }
+
+        /* ===== Common UI ===== */
+
+        .header {
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: 42px;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 17px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card,
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card {
+            padding: 22px;
+        }
+
+        .stat-card .label {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .card {
+            padding: 24px;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section-head h2 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -0.02em;
+        }
+
+        .helper-text {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr auto auto;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .bulk-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            background: var(--surface-soft);
+            border-radius: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+            color: var(--text);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #bfdbfe;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-row {
+            margin-bottom: 18px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-dark {
+            background: var(--dark);
+            color: white;
+        }
+
+        .btn-gray {
+            background: var(--gray-btn);
+            color: var(--text);
+        }
+
+        .btn-gray:hover {
+            background: var(--gray-btn-hover);
+        }
+
+        .btn-red {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-red:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .disabled-action {
+            opacity: 0.45;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead th {
+            background: #fbfcfe;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        th, td {
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.18s ease;
+        }
+
+        tbody tr:hover {
+            background: #fafcff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .device-name {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .device-name:hover {
+            color: var(--primary);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .online {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .unknown {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 14px 22px;
+        }
+
+        .detail-label {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 36px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            border: 1px solid transparent;
+        }
+
+        .success {
+            background: #ecfdf5;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .warning {
+            background: #fffbeb;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        /* ===== Mobile ===== */
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 210px;
+            }
+
+            .main {
+                margin-left: 210px;
+                width: calc(100% - 210px);
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                min-height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .sidebar-footer {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .container {
+                padding: 24px 18px 50px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .section-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a class="brand" href="{% url 'devices:device_list' %}">
+                    SwitchBoard
+                </a>
+
+                <div class="user-card">
+                    <div class="user-label">Пользователь</div>
+                    <div class="user-name">{{ user.username }}</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="nav-link" href="{% url 'devices:device_list' %}">
+                    <span class="nav-icon">⌂</span>
+                    <span>Дашборд</span>
+                </a>
+
+                <a class="nav-link" href="{% url 'devices:network_task_list' %}">
+                    <span class="nav-icon">▶</span>
+                    <span>Операции</span>
+                </a>
+
+                <a class="nav-link" href="{% url 'devices:operation_list' %}">
+                    <span class="nav-icon">≡</span>
+                    <span>Журнал</span>
+                </a>
+
+                <a class="nav-link" href="{% url 'devices:about' %}">
+                    <span class="nav-icon">?</span>
+                    <span>О проекте</span>
+                </a>
+                
+                {% if user.is_staff %}
+                    <a class="nav-link" href="/admin/">
+                        <span class="nav-icon">⚙</span>
+                        <span>Админка</span>
+                    </a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-footer">
+                <form class="logout-form" method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="logout-button" type="submit">
+                        <span class="nav-icon">↪</span>
+                        <span>Выйти</span>
+                    </button>
+                </form>
+
+                <div class="sidebar-collapse">
+                    ‹
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="container">
+{% else %}
+        <main class="auth-main">
+            <div class="container">
+{% endif %}
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+
+{% if user.is_authenticated %}
+            </div>
+        </main>
+    </div>
+{% else %}
+            </div>
+        </main>
+{% endif %}
+
+</body>
+</html>

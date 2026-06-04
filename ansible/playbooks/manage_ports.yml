@@ -1,0 +1,17 @@
+---
+- name: Manage Cisco switch ports
+  hosts: switches
+  gather_facts: false
+
+  tasks:
+    - name: Apply selected port action
+      cisco.ios.ios_config:
+        lines:
+          - "{{ port_action }}"
+        parents: "interface {{ item }}"
+      loop: "{{ selected_ports }}"
+      register: port_result
+
+    - name: Print changed ports
+      ansible.builtin.debug:
+        msg: "Applied '{{ port_action }}' to {{ selected_ports | join(', ') }}"

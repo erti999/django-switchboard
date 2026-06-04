@@ -1,0 +1,183 @@
+{% extends 'devices/base.html' %}
+
+{% block content %}
+
+<div class="header">
+    <h1>{{ device.name }}</h1>
+    <p>Карточка сетевого устройства</p>
+</div>
+
+<div class="card">
+    <div class="detail-grid">
+        <div class="detail-label">IP-адрес</div>
+        <div>{{ device.ip_address }}</div>
+
+        <div class="detail-label">Вендор</div>
+        <div>{{ device.vendor }}</div>
+
+        <div class="detail-label">Модель</div>
+        <div>{{ device.model }}</div>
+
+        <div class="detail-label">Локация</div>
+        <div>{{ device.location }}</div>
+
+        <div class="detail-label">Статус</div>
+        <div>
+            <span class="status {{ device.status }}">
+                {{ device.get_status_display }}
+            </span>
+        </div>
+
+        <div class="detail-label">Описание</div>
+        <div>{{ device.description|default:"Описание отсутствует" }}</div>
+
+        <div class="detail-label">Создано</div>
+        <div>{{ device.created_at|date:"d.m.Y H:i" }}</div>
+
+        <div class="detail-label">Обновлено</div>
+        <div>{{ device.updated_at|date:"d.m.Y H:i" }}</div>
+    </div>
+
+    <div style="margin-top: 28px;">
+        <div class="section-head">
+            <div>
+                <h2>Сетевые операции</h2>
+            </div>
+        </div>
+
+        {% if perms.devices.change_device %}
+            <div class="actions" style="margin-bottom: 18px;">
+                <form method="post" action="{% url 'devices:network_task_create' device.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="task_type" value="info">
+                    <button class="btn btn-dark" type="submit">
+                        Вывести информацию
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'devices:network_task_create' device.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="task_type" value="backup">
+                    <button class="btn btn-primary" type="submit">
+                        Создать backup
+                    </button>
+                </form>
+            </div>
+
+            <div class="card" style="box-shadow: none; background: #f8fafc; margin-top: 18px;">
+                <h3 style="margin-top: 0;">Управление портами</h3>
+
+                <form method="post" action="{% url 'devices:network_task_create' device.pk %}">
+                    {% csrf_token %}
+
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0;">
+                        {% for port in port_choices %}
+                            <label style="
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                                font-weight: 500;
+                                padding: 12px 14px;
+                                border: 1px solid #dbe2ea;
+                                border-radius: 12px;
+                                background: #ffffff;
+                                cursor: pointer;
+                            ">
+                                <input
+                                    type="checkbox"
+                                    name="ports"
+                                    value="{{ port.value }}"
+                                >
+                                {{ port.label }}
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="actions">
+                        <button
+                            class="btn btn-red"
+                            type="submit"
+                            name="task_type"
+                            value="ports_shutdown"
+                        >
+                            Отключить выбранные
+                        </button>
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit"
+                            name="task_type"
+                            value="ports_no_shutdown"
+                        >
+                            Включить выбранные
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <p class="helper-text">
+                У вас нет прав на выполнение сетевых операций.
+            </p>
+        {% endif %}
+    </div>
+
+    {% if recent_tasks %}
+        <div style="margin-top: 28px;">
+            <h2>Последние операции</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Пользователь</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for task in recent_tasks %}
+                            <tr>
+                                <td>{{ task.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ task.get_task_type_display }}</td>
+                                <td>{{ task.get_status_display }}</td>
+                                <td>
+                                    {% if task.user %}
+                                        {{ task.user.username }}
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a class="btn btn-gray" href="{% url 'devices:network_task_detail' task.pk %}">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 24px;" class="actions">
+        <a class="btn btn-gray" href="{% url 'devices:device_list' %}">Назад</a>
+
+        {% if perms.devices.change_device %}
+            <a class="btn btn-primary" href="{% url 'devices:device_update' device.pk %}">
+                Редактировать
+            </a>
+        {% endif %}
+
+        {% if perms.devices.delete_device %}
+            <a class="btn btn-red" href="{% url 'devices:device_delete' device.pk %}">
+                Удалить
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

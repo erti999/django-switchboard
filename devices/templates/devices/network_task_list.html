@@ -1,0 +1,68 @@
+{% extends 'devices/base.html' %}
+
+{% block content %}
+
+<div class="header">
+    <h1>Операции</h1>
+</div>
+
+<div class="card">
+    <div class="section-head">
+        <div>
+            <h2>Последние операции</h2>
+            <div class="helper-text">
+                Отображаются последние 100 операций
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Коммутатор</th>
+                    <th>Тип</th>
+                    <th>Статус</th>
+                    <th>Пользователь</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>{{ task.device.name }}</td>
+                        <td>{{ task.get_task_type_display }}</td>
+                        <td>
+                            <span class="status {% if task.status == 'success' %}online{% elif task.status == 'failed' %}offline{% else %}unknown{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if task.user %}
+                                {{ task.user.username }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-gray" href="{% url 'devices:network_task_detail' task.pk %}">
+                                Открыть
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty">
+                            Операций пока нет.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
