@@ -1,17 +1,19 @@
 ---
-- name: Get Cisco switch information
+- name: Получить информацию
   hosts: switches
   gather_facts: false
 
   tasks:
-    - name: Run show commands
+    - name: Получить информацию
       cisco.ios.ios_command:
         commands:
-          - show version
+          - show version | include Version
+          - show version | include uptime
+          - show version | include image
+          - show version | include Processor.board.ID
           - show ip interface brief
-          - show interfaces status
       register: command_result
 
-    - name: Print command output
+    - name: Вывести информацию
       ansible.builtin.debug:
         var: command_result.stdout_lines

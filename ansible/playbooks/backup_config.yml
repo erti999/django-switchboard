@@ -1,21 +1,21 @@
 ---
-- name: Backup Cisco switch running config
+- name: Создать backup
   hosts: switches
   gather_facts: false
 
   tasks:
-    - name: Get running config
+    - name: Получить running-config
       cisco.ios.ios_command:
         commands:
           - show running-config
       register: backup_result
 
-    - name: Save backup locally
+    - name: Сохранить backup
       ansible.builtin.copy:
         content: "{{ backup_result.stdout[0] }}"
         dest: "{{ backup_file }}"
         mode: "0600"
 
-    - name: Print backup location
+    - name: Вывести путь backup
       ansible.builtin.debug:
         msg: "Backup saved to {{ backup_file }}"
